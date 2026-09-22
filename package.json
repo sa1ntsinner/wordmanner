@@ -1,0 +1,24 @@
+{
+  "name": "wordmanner",
+  "version": "0.1.0",
+  "description": "A local writing voice layer for AI agents",
+  "type": "module",
+  "bin": {
+    "wordmanner": "./dist/src/cli.js"
+  },
+  "files": ["dist/src", "skill", "docs", "examples", "market-research.md", "README.md", "LICENSE"],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc --noEmit -p tsconfig.json",
+    "prepare": "npm run build",
+    "test": "npm run build && node --test dist/test/*.test.js"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.9.0"
+  },
+  "license": "MIT"
+}

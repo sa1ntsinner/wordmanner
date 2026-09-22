@@ -1,0 +1,2 @@
+{"id":"sample-en-email-1","text":"Hi Alex,\nI checked the calibration values. The second table still has the old range, so I'll update it before sending the draft.\n\nBest,\nSam","language":"en","medium":"email","audience":"colleague","intent":"status update"}
+{"id":"sample-ru-chat-1","text":"Посмотрел логи. Ошибка появляется после переподключения, когда старый таймер ещё активен. Исправлю сброс таймера и проверю повторный запуск.","language":"ru","medium":"chat","audience":"colleague","intent":"status update"}
