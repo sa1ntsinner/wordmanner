@@ -6,7 +6,7 @@ Wordmanner is an early open-source prototype. It currently provides a portable [
 
 ## Install in a project
 
-Requires Node.js 20 or later.
+Requires Node.js 22 or later.
 
 ```sh
 npx --yes github:sa1ntsinner/wordmanner init --dry-run
