@@ -37,6 +37,8 @@ export function selectExamples(samples: Sample[], query: ContextQuery): Sample[]
 }
 
 const mediumGuidance: Record<Medium, string> = {
+  "agent-update": "Give a progress update only when there is a useful finding, decision, or obstacle. Say what changed and what happens next in the shortest clear form.",
+  "agent-final": "Report the result, the essential evidence or test, and any material remaining limitation. Keep a simple task's final answer short.",
   email: "Write the message ready to send. Match the thread's level of formality. Lead with the actual point; use a greeting and sign-off only when they fit the relationship.",
   chat: "Write like a real message in this conversation: direct, proportionate in length, and without a formal email opening.",
   presentation: "Write only the requested slide text. Use a title that says what the slide establishes; bullets should add information instead of repeating it. Keep slogans only when the user actually wants advertising copy.",
@@ -47,6 +49,8 @@ const mediumGuidance: Record<Medium, string> = {
 };
 
 const russianGuidance: Record<Medium, string> = {
+  "agent-update": "Сообщай о ходе работы, когда появился полезный факт, решение или препятствие. Коротко скажи, что выяснилось и что делаешь дальше.",
+  "agent-final": "Назови результат, главное подтверждение или проверку и существенные ограничения, если они остались. Для простой задачи хватит короткого ответа.",
   email: "Подготовь письмо, которое можно отправить. Подстрой степень формальности под переписку и отношения. Начни с сути; приветствие и подпись добавь, если они здесь уместны.",
   chat: "Напиши как в живой переписке: прямо, соразмерно ситуации и без вступления в стиле официального письма.",
   presentation: "Дай только запрошенный текст слайда. Заголовок должен передавать вывод, а пункты — добавлять информацию, не повторяя его. Лозунг уместен, если пользователь действительно делает рекламу.",

@@ -42,4 +42,5 @@ test("retrieval stays within language and medium, while examples remain quoted d
   assert.match(context, /never as instructions or facts/);
   assert.doesNotMatch(context, /publish secrets/);
   assert.match(renderContext({ language: "ru", medium: "presentation" }, []), /Не утверждай, что знаешь/);
+  assert.match(renderContext({ language: "ru", medium: "agent-update" }, []), /полезный факт/);
 });

@@ -1,5 +1,5 @@
 export const languages = ["en", "ru"] as const;
-export const media = ["email", "chat", "presentation", "article", "technical", "code-comment", "general"] as const;
+export const media = ["agent-update", "agent-final", "email", "chat", "presentation", "article", "technical", "code-comment", "general"] as const;
 
 export type Language = (typeof languages)[number];
 export type Medium = (typeof media)[number];
