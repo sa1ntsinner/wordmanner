@@ -28,6 +28,10 @@ The example messages are synthetic. Add your own **outgoing, user-authored** sam
 
 Explicit preferences can live beside the examples. Add one with `wordmanner notes add --language en --medium email --text 'Keep routine replies brief.'`; inspect them with `wordmanner notes list`. These notes are optional and apply only to matching contexts. They are useful when the user has no writing archive or wants to correct an inference from examples.
 
+For Telegram Desktop exports, run `wordmanner telegram preview "/path/to/result.json"`, choose chats in its private report, then prepare and review examples before importing. See the [Telegram import guide](docs/telegram.md). The original archive stays local and is never copied into the repository.
+
+The same preview and review principles will guide future mail and chat connectors; see the [import UX design](docs/import-ux.ru.md).
+
 `init` installs the [skill](skill/wordmanner/SKILL.md) and a short persistent instruction for Claude Code, Codex, and Gemini CLI, plus a Cursor rule. It writes only Wordmanner-owned files or marked blocks. `--dry-run` lists paths first; `uninstall` removes only unedited Wordmanner content. Select a subset with `--agents claude,codex`. Local installation cannot affect browser-only chat products automatically.
 
 ## Blind comparison

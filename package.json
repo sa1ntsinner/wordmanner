@@ -6,7 +6,15 @@
   "bin": {
     "wordmanner": "./dist/src/cli.js"
   },
-  "files": ["dist/src", "skill", "docs", "examples", "market-research.md", "README.md", "LICENSE"],
+  "files": [
+    "dist/src",
+    "skill",
+    "docs",
+    "examples",
+    "market-research.md",
+    "README.md",
+    "LICENSE"
+  ],
   "engines": {
     "node": ">=22"
   },
@@ -20,5 +28,8 @@
     "@types/node": "^22.0.0",
     "typescript": "^5.9.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "stream-json": "^3.7.0"
+  }
 }

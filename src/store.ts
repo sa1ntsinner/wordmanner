@@ -32,6 +32,10 @@ function assertUnique(samples: Sample[]): void {
 
 export async function importSamples(inputPath: string, storePath = defaultStore): Promise<number> {
   const incoming = parseJsonl(await readFile(inputPath, "utf8"), parseSample);
+  return appendSamples(incoming, storePath);
+}
+
+export async function appendSamples(incoming: Sample[], storePath = defaultStore): Promise<number> {
   if (incoming.length === 0) throw new Error("input contains no samples");
   const existing = await loadSamples(storePath);
   const combined = [...existing, ...incoming];

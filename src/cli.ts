@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-import { resolve } from "node:path";
+import { randomUUID } from "node:crypto";
+import { dirname, join, resolve } from "node:path";
 import { writeBlindRun, scoreRun } from "./benchmark.js";
 import { renderContext, selectExamples } from "./context.js";
 import { generateCandidates } from "./generate.js";
@@ -7,6 +8,7 @@ import { agents, applyIntegration, planIntegration, type Agent } from "./integra
 import { languages, media, type Language, type Medium } from "./sample.js";
 import { addNote, defaultNotes, loadNotes, matchingNotes } from "./notes.js";
 import { defaultStore, importSamples, loadSamples } from "./store.js";
+import { applyTelegram, excludeTelegram, prepareTelegram, previewTelegram } from "./telegram.js";
 
 const help = `wordmanner — writing context for AI agents
 
@@ -15,6 +17,10 @@ Commands:
   wordmanner samples inspect [--store <path>]
   wordmanner notes add --text <preference> [--language en|ru] [--medium <medium>] [--file <path>]
   wordmanner notes list [--file <path>]
+  wordmanner telegram preview <result.json> [--out <new-directory>] [--self-id <sender-id>]
+  wordmanner telegram prepare <preview-directory> --chats <id,id,...> --language en|ru [--out <new-directory>] [--audience <text>] [--limit <count>] [--per-chat <count>]
+  wordmanner telegram exclude <prepared-directory> --numbers <1,3,...>
+  wordmanner telegram apply <prepared-directory> [--store <path>]
   wordmanner context --language en|ru --medium <medium> [--audience <text>] [--intent <text>] [--topic <text>] [--store <path>] [--notes <path>]
   wordmanner bench blind <cases.jsonl> --out <new-directory> [--seed <text>]
   wordmanner bench generate <cases.jsonl> --name <variant> --out <new-file> [--cwd <dir>] [--wordmanner] [--store <path>] [--notes <path>] -- <executable> [args...]
@@ -50,12 +56,59 @@ function flag(args: string[], name: string): boolean {
   return true;
 }
 
+function importDirectory(stage: string): string {
+  return join(dirname(defaultStore), "imports", `${stage}-${new Date().toISOString().slice(0, 10)}-${randomUUID().slice(0, 8)}`);
+}
+
 async function run(args: string[]): Promise<void> {
   if (args.length === 0 || args.includes("--help") || args.includes("-h")) {
     console.log(help);
     return;
   }
   const command = args.shift();
+  if (command === "telegram") {
+    const action = args.shift();
+    if (action === "preview") {
+      const input = required(args.shift(), "Telegram result.json");
+      const output = option(args, "out") ?? importDirectory("telegram-preview");
+      const selfId = option(args, "self-id");
+      noExtras(args);
+      const manifest = await previewTelegram(input, output, selfId);
+      console.log(`Previewed ${manifest.chats.length} chats. Review ${resolve(output, "report.md")} to choose chat IDs. No messages were imported.`);
+      return;
+    }
+    if (action === "prepare") {
+      const previewDir = required(args.shift(), "preview directory");
+      const outputDir = option(args, "out") ?? importDirectory("telegram-review");
+      const chatIds = required(option(args, "chats"), "--chats").split(",").map(id => id.trim());
+      const language = required(option(args, "language"), "--language");
+      const audience = option(args, "audience");
+      const limit = option(args, "limit");
+      const perChat = option(args, "per-chat");
+      noExtras(args);
+      if (!languages.includes(language as Language)) throw new Error(`invalid language: ${language}`);
+      const count = await prepareTelegram({ previewDir, outputDir, chatIds, language: language as Language,
+        ...(audience ? { audience } : {}), ...(limit ? { limit: Number(limit) } : {}), ...(perChat ? { perChat: Number(perChat) } : {}) });
+      console.log(`Prepared ${count} local examples. Review ${resolve(outputDir, "review.md")} and edit samples.jsonl before applying.`);
+      return;
+    }
+    if (action === "apply") {
+      const preparedDir = required(args.shift(), "prepared directory");
+      const store = option(args, "store") ?? defaultStore;
+      noExtras(args);
+      const count = await applyTelegram(preparedDir, store);
+      console.log(`Imported ${count} reviewed Telegram examples into ${store}`);
+      return;
+    }
+    if (action === "exclude") {
+      const preparedDir = required(args.shift(), "prepared directory");
+      const numbers = required(option(args, "numbers"), "--numbers").split(",").map(number => Number(number.trim()));
+      noExtras(args);
+      const count = await excludeTelegram(preparedDir, numbers);
+      console.log(`Excluded ${count} example${count === 1 ? "" : "s"} from import. Original review files remain unchanged.`);
+      return;
+    }
+  }
   if (command === "notes") {
     const action = args.shift();
     if (action === "add") {
