@@ -4,15 +4,22 @@ Writing context for AI agents: clear updates, useful code comments, stronger sli
 
 Wordmanner is an early open-source prototype. It currently provides a portable [skill](skill/wordmanner/SKILL.md), a local sample library, contextual example selection, and a blind comparison tool. It does not claim to reproduce anyone's voice automatically or beat existing products yet.
 
-## Try it
+## Install in a project
 
 Requires Node.js 20 or later.
 
 ```sh
+npx --yes github:sa1ntsinner/wordmanner init --dry-run
+npx --yes github:sa1ntsinner/wordmanner init
+```
+
+The first command lists every file that would change. The second installs project instructions for Claude Code, Codex, Gemini CLI, and Cursor. Select only some agents with `--agents claude,codex`.
+
+## Work from this repository
+
+```sh
 npm install
 npm link
-wordmanner init --dry-run
-wordmanner init
 wordmanner samples import examples/samples.jsonl --store .wordmanner/demo-samples.jsonl
 wordmanner context --language en --medium email --audience colleague --intent 'status update' --store .wordmanner/demo-samples.jsonl
 ```
