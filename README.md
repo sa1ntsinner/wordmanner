@@ -24,7 +24,9 @@ wordmanner samples import examples/samples.jsonl --store .wordmanner/demo-sample
 wordmanner context --language en --medium email --audience colleague --intent 'status update' --store .wordmanner/demo-samples.jsonl
 ```
 
-The example messages are synthetic. Add your own **outgoing, user-authored** samples to a JSONL file with `id`, `text`, `language` (`en` or `ru`), and `medium` (`agent-update`, `agent-final`, `email`, `chat`, `presentation`, `article`, `technical`, `code-comment`, `general`). Optional fields are `audience`, `intent`, and `tags`. By default, imported samples live in `~/.wordmanner/samples.jsonl` so the same voice is available across projects. Set `WORDMANNER_HOME` or `--store` to choose another location. The local `.wordmanner/` directory is ignored by git for demos and private benchmarks. The CLI has no model API calls or telemetry. The `context` command prints selected sample excerpts; sharing that output with a cloud model shares those excerpts with that provider.
+The example messages are synthetic. Add your own **outgoing, user-authored** samples to a JSONL file with `id`, `text`, `language` (`en` or `ru`), and `medium` (`agent-update`, `agent-final`, `email`, `chat`, `presentation`, `article`, `technical`, `code-comment`, `general`). Optional fields are `audience`, `intent`, and `tags`. By default, imported samples live in `~/.wordmanner/samples.jsonl` so the same voice is available across projects. Set `WORDMANNER_HOME` or `--store` to choose another location. The local `.wordmanner/` directory is ignored by git for demos and private benchmarks. Import and context selection run locally, with no telemetry or model API calls. The optional `bench generate` command launches a model command you provide. The `context` command prints selected sample excerpts; sharing that output with a cloud model shares those excerpts with that provider.
+
+Explicit preferences can live beside the examples. Add one with `wordmanner notes add --language en --medium email --text 'Keep routine replies brief.'`; inspect them with `wordmanner notes list`. These notes are optional and apply only to matching contexts. They are useful when the user has no writing archive or wants to correct an inference from examples.
 
 `init` installs the [skill](skill/wordmanner/SKILL.md) and a short persistent instruction for Claude Code, Codex, and Gemini CLI, plus a Cursor rule. It writes only Wordmanner-owned files or marked blocks. `--dry-run` lists paths first; `uninstall` removes only unedited Wordmanner content. Select a subset with `--agents claude,codex`. Local installation cannot affect browser-only chat products automatically.
 
@@ -34,7 +36,7 @@ The example messages are synthetic. Add your own **outgoing, user-authored** sam
 wordmanner bench blind examples/benchmark-cases.jsonl --out .wordmanner/demo-run
 ```
 
-Give a rater only `.wordmanner/demo-run/ballot.jsonl`, never `key.json`. See the [benchmark protocol](docs/benchmark.md). The example outputs are illustrations, not evidence of performance.
+Give a rater only `.wordmanner/demo-run/ballot.md` or `ballot.jsonl`, never `key.json`. See the [benchmark protocol](docs/benchmark.md). The example outputs are illustrations, not evidence of performance.
 
 ## Design and competition
 

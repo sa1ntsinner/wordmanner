@@ -16,12 +16,13 @@ test("blind ballot hides variant names and scoring uses the private key", async 
     assert.equal(await writeBlindRun(input, output, "fixed-seed"), 1);
     const ballotText = await readFile(join(output, "ballot.jsonl"), "utf8");
     assert.doesNotMatch(ballotText, /"raw"|"wordmanner"/);
+    assert.match(await readFile(join(output, "ballot.md"), "utf8"), /sounds like me/);
     const key = JSON.parse(await readFile(join(output, "key.json"), "utf8")) as { cases: { labels: Record<string, string> }[] };
     const label = Object.entries(key.cases[0]!.labels).find(([, name]) => name === "wordmanner")?.[0];
     assert.ok(label);
     const ratings = join(directory, "ratings.jsonl");
-    await writeFile(ratings, JSON.stringify({ id: "case-1", chosen_label: label, rater: "human-1" }) + "\n");
-    assert.deepEqual(await scoreRun(join(output, "key.json"), ratings), { total: 1, wins: { wordmanner: 1 } });
+    await writeFile(ratings, JSON.stringify({ id: "case-1", chosen_label: label, rater: "human-1", criterion: "voice" }) + "\n" + JSON.stringify({ id: "case-1", chosen_label: label, rater: "human-1", criterion: "sendability" }) + "\n");
+    assert.deepEqual(await scoreRun(join(output, "key.json"), ratings), { total: 2, by_criterion: { voice: { wordmanner: 1 }, sendability: { wordmanner: 1 } } });
     await assert.rejects(writeBlindRun(input, output, "fixed-seed"));
   } finally {
     await rm(directory, { recursive: true, force: true });

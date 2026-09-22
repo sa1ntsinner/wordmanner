@@ -24,6 +24,7 @@ interface Rating {
   id: string;
   chosen_label: string;
   rater?: string;
+  criterion?: string;
 }
 
 function record(value: unknown): value is Record<string, unknown> {
@@ -74,6 +75,19 @@ export async function writeBlindRun(inputPath: string, outputDir: string, seed: 
   await mkdir(dirname(outputDir), { recursive: true, mode: 0o700 });
   await mkdir(outputDir, { recursive: false, mode: 0o700 });
   await writeFile(join(outputDir, "ballot.jsonl"), ballot.map(item => JSON.stringify(item)).join("\n") + "\n", { mode: 0o600, flag: "wx" });
+  const quote = (value: string): string => value.split(/\r?\n/).map(line => `> ${line}`).join("\n");
+  const markdown = [
+    "# Blind writing ballot",
+    "",
+    "For each case, choose one label for **sounds like me** and one for **I would send this**. Record any factual mistakes separately. Candidate names are hidden in key.json.",
+    ...ballot.flatMap(item => [
+      "", `## ${item.id}`, "", "### Task", "", quote(item.prompt),
+      ...item.candidates.flatMap(candidate => ["", `### ${candidate.label}`, "", quote(candidate.text)]),
+      "", "My picks: sounds like me ___ ; I would send ___ ; factual errors ___.",
+    ]),
+    "",
+  ].join("\n");
+  await writeFile(join(outputDir, "ballot.md"), markdown, { mode: 0o600, flag: "wx" });
   await writeFile(join(outputDir, "key.json"), JSON.stringify({ version: 1, seed, cases: key }, null, 2) + "\n", { mode: 0o600, flag: "wx" });
   return cases.length;
 }
@@ -83,12 +97,14 @@ function parseRating(value: unknown): Rating {
     throw new Error("rating needs id and chosen_label");
   }
   if (value.rater !== undefined && typeof value.rater !== "string") throw new Error("rater must be a string");
+  if (value.criterion !== undefined && (typeof value.criterion !== "string" || !value.criterion.trim())) throw new Error("criterion must be a non-empty string");
   const rating: Rating = { id: value.id, chosen_label: value.chosen_label };
   if (typeof value.rater === "string") rating.rater = value.rater;
+  if (typeof value.criterion === "string") rating.criterion = value.criterion;
   return rating;
 }
 
-export async function scoreRun(keyPath: string, ratingsPath: string): Promise<{ total: number; wins: Record<string, number> }> {
+export async function scoreRun(keyPath: string, ratingsPath: string): Promise<{ total: number; by_criterion: Record<string, Record<string, number>> }> {
   const rawKey: unknown = JSON.parse(await readFile(keyPath, "utf8"));
   if (!record(rawKey) || rawKey.version !== 1 || !Array.isArray(rawKey.cases)) throw new Error("invalid benchmark key");
   const key = new Map<string, Record<string, string>>();
@@ -101,14 +117,17 @@ export async function scoreRun(keyPath: string, ratingsPath: string): Promise<{ 
   const ratings = parseJsonl(await readFile(ratingsPath, "utf8"), parseRating);
   if (!ratings.length) throw new Error("ratings contain no choices");
   const unique = new Set<string>();
-  const wins: Record<string, number> = {};
+  const byCriterion = new Map<string, Map<string, number>>();
   for (const rating of ratings) {
     const name = key.get(rating.id)?.[rating.chosen_label];
     if (!name) throw new Error(`unknown case or label: ${rating.id}/${rating.chosen_label}`);
-    const pair = `${rating.rater ?? "default"}\0${rating.id}`;
+    const criterion = rating.criterion ?? "overall";
+    const pair = `${rating.rater ?? "default"}\0${rating.id}\0${criterion}`;
     if (unique.has(pair)) throw new Error(`duplicate rating for ${rating.id} by ${rating.rater ?? "default"}`);
     unique.add(pair);
-    wins[name] = (wins[name] ?? 0) + 1;
+    const wins = byCriterion.get(criterion) ?? new Map<string, number>();
+    wins.set(name, (wins.get(name) ?? 0) + 1);
+    byCriterion.set(criterion, wins);
   }
-  return { total: ratings.length, wins };
+  return { total: ratings.length, by_criterion: Object.fromEntries([...byCriterion].map(([criterion, wins]) => [criterion, Object.fromEntries(wins)])) };
 }
